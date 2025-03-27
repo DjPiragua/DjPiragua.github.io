@@ -7,16 +7,21 @@
 <body>
   <h1>Juego de Preguntas Diarias</h1>
 
+  <!-- Selección de usuario -->
   <label for="userSelect">Selecciona tu usuario:</label>
   <select id="userSelect">
     <option value="" disabled selected>-- Selecciona opción --</option>
   </select>
   <button id="userButton">Continuar</button>
 
+  <!-- Contenedor para la pregunta y respuestas -->
   <div id="questionContainer" style="display:none;">
     <h2 id="questionText"></h2>
     <div id="answersContainer"></div>
+    <button id="nextQuestionBtn">Cambiar Pregunta</button>
   </div>
+
+  <!-- Resultados -->
   <div id="resultsContainer"></div>
 
   <script>
@@ -40,10 +45,24 @@
       }
     ];
 
-    let clickCounts = {};
-    const userSelect = document.getElementById("userSelect");
+    // questionVotes[qIndex][option] = número de votos
+    let questionVotes = [];
+    // questionUserVotes[qIndex][user] = opción que votó
+    let questionUserVotes = [];
 
-    // Poblar lista de usuarios
+    let currentUser = null;
+    let questionIndex = 0;
+
+    // Inicializar questionVotes y questionUserVotes según el número de preguntas
+    questionsData.forEach(q => {
+      let optCounts = {};
+      q.options.forEach(opt => { optCounts[opt] = 0; });
+      questionVotes.push(optCounts);
+      questionUserVotes.push({});
+    });
+
+    // Rellenar Select de usuarios
+    const userSelect = document.getElementById("userSelect");
     users.forEach(u => {
       const optEl = document.createElement("option");
       optEl.value = u;
@@ -51,46 +70,68 @@
       userSelect.appendChild(optEl);
     });
 
-    // Evento al pulsar el botón de continuar
     document.getElementById("userButton").addEventListener("click", () => {
       if (!userSelect.value) {
         alert("Selecciona un usuario primero.");
         return;
       }
+      currentUser = userSelect.value;
+      // Bloquear selección de usuario
       userSelect.disabled = true;
       document.getElementById("userButton").disabled = true;
+      // Mostrar contenedor de pregunta
       document.getElementById("questionContainer").style.display = "block";
-      showRandomQuestion();
+      showQuestion(questionIndex);
     });
 
-    function showRandomQuestion() {
-      const randomIndex = Math.floor(Math.random() * questionsData.length);
-      const currentQ = questionsData[randomIndex];
+    // Evento para cambiar de pregunta
+    document.getElementById("nextQuestionBtn").addEventListener("click", () => {
+      questionIndex++;
+      if (questionIndex >= questionsData.length) {
+        document.getElementById("questionText").textContent = "No hay más preguntas.";
+        document.getElementById("answersContainer").innerHTML = "";
+      } else {
+        showQuestion(questionIndex);
+      }
+    });
 
+    function showQuestion(index) {
+      const currentQ = questionsData[index];
       document.getElementById("questionText").textContent = currentQ.question;
       const answersContainer = document.getElementById("answersContainer");
       answersContainer.innerHTML = "";
       document.getElementById("resultsContainer").textContent = "";
 
-      clickCounts = {};
       currentQ.options.forEach(opt => {
-        clickCounts[opt] = 0;
         const btn = document.createElement("button");
         btn.textContent = opt;
-        btn.addEventListener("click", () => {
-          clickCounts[opt]++;
-          showResults();
-        });
+        btn.addEventListener("click", () => voteOption(index, opt));
         answersContainer.appendChild(btn);
       });
+
+      showResults(index);
     }
 
-    function showResults() {
+    function voteOption(qIndex, option) {
+      // Verificar si usuario ya votó
+      if (questionUserVotes[qIndex][currentUser]) {
+        alert("Ya votaste esta pregunta.");
+        return;
+      }
+      // Registrar voto
+      questionUserVotes[qIndex][currentUser] = option;
+      questionVotes[qIndex][option]++;
+      showResults(qIndex);
+    }
+
+    function showResults(qIndex) {
       const resultsContainer = document.getElementById("resultsContainer");
       resultsContainer.innerHTML = "";
-      for (const option in clickCounts) {
+      const votesObj = questionVotes[qIndex];
+
+      for (let opt in votesObj) {
         const p = document.createElement("p");
-        p.textContent = `${option}: ${clickCounts[option]} votos`;
+        p.textContent = `${opt}: ${votesObj[opt]} votos`;
         resultsContainer.appendChild(p);
       }
     }
