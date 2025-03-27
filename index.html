@@ -2,30 +2,109 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Tag Click Counter</title>
+  <title>Juego de Preguntas Diarias</title>
 </head>
 <body>
-  <h1>Tag Click Counter Title</h1>
-  <div id="tags"></div>
-  <div id="results"></div>
+  <h1>Juego de Preguntas Diarias</h1>
+
+  <!-- Selección de usuario -->
+  <div>
+    <label for="userSelect">Selecciona tu usuario:</label>
+    <select id="userSelect"></select>
+    <button id="userButton">Continuar</button>
+  </div>
+
+  <!-- Contenedor de preguntas y respuestas -->
+  <div id="questionContainer" style="display:none;">
+    <h2 id="questionText"></h2>
+    <div id="answersContainer"></div>
+  </div>
+
+  <!-- Contenedor de resultados -->
+  <div id="resultsContainer"></div>
 
   <script>
-    const tagTexts = ["Tag A", "Tag B", "Tag C"];
-    const clickCounts = { "Tag A": 0, "Tag B": 0, "Tag C": 0 };
+    // Listado de usuarios
+    const users = [
+      "usuario1","usuario2","usuario3","usuario4","usuario5",
+      "usuario6","usuario7","usuario8","usuario9","usuario10","usuario11"
+    ];
 
-    const tagsContainer = document.getElementById("tags");
-    const resultsContainer = document.getElementById("results");
+    // Preguntas: cada elemento contiene - texto de pregunta y array con opciones
+    // Ejemplo: { question: "¿Pregunta X?", options: ["A","B","C","D"] }
+    const questionsData = [
+      {
+        question: "¿Cuál es tu color favorito?",
+        options: ["Azul", "Rojo", "Verde", "Amarillo"]
+      },
+      {
+        question: "¿Qué lenguaje de programación prefieres?",
+        options: ["JavaScript", "Python", "C#", "Java"]
+      },
+      {
+        question: "¿Cuál es tu deporte favorito?",
+        options: ["Fútbol", "Baloncesto", "Tenis", "Natación"]
+      }
+      // Agrega más preguntas si lo deseas
+    ];
 
-    // Generate clickable tags
-    tagTexts.forEach(tag => {
-      const btn = document.createElement("button");
-      btn.textContent = tag;
-      btn.addEventListener("click", () => {
-        clickCounts[tag]++;
-        resultsContainer.textContent = JSON.stringify(clickCounts);
-      });
-      tagsContainer.appendChild(btn);
+    // Almacena cuántos votos tiene cada opción
+    let clickCounts = {};
+
+    // Inicializar select de usuarios
+    const userSelect = document.getElementById("userSelect");
+    users.forEach(u => {
+      const optionEl = document.createElement("option");
+      optionEl.value = u;
+      optionEl.textContent = u;
+      userSelect.appendChild(optionEl);
     });
+
+    // Evento para botón de selección de usuario
+    document.getElementById("userButton").addEventListener("click", () => {
+      const selectedUser = userSelect.value; // Se puede usar si se requiere
+      // Ocultar selección de usuario y mostrar la pregunta
+      document.getElementById("userSelect").disabled = true;
+      document.getElementById("userButton").disabled = true;
+      document.getElementById("questionContainer").style.display = "block";
+      showRandomQuestion();
+    });
+
+    // Mostrar pregunta aleatoria
+    function showRandomQuestion() {
+      const randomIndex = Math.floor(Math.random() * questionsData.length);
+      const current = questionsData[randomIndex];
+      document.getElementById("questionText").textContent = current.question;
+
+      // Limpiar contenedores y contadores
+      clickCounts = {};
+      const answersContainer = document.getElementById("answersContainer");
+      answersContainer.innerHTML = "";
+      document.getElementById("resultsContainer").textContent = "";
+
+      // Crear botones
+      current.options.forEach(opt => {
+        clickCounts[opt] = 0;
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.addEventListener("click", () => {
+          clickCounts[opt]++;
+          showResults();
+        });
+        answersContainer.appendChild(btn);
+      });
+    }
+
+    // Mostrar resultados
+    function showResults() {
+      const resultsContainer = document.getElementById("resultsContainer");
+      resultsContainer.innerHTML = "";
+      for (const option in clickCounts) {
+        const p = document.createElement("p");
+        p.textContent = `${option}: ${clickCounts[option]} votos`;
+        resultsContainer.appendChild(p);
+      }
+    }
   </script>
 </body>
 </html>
