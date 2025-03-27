@@ -7,31 +7,24 @@
 <body>
   <h1>Juego de Preguntas Diarias</h1>
 
-  <!-- Selección de usuario -->
-  <div>
-    <label for="userSelect">Selecciona tu usuario:</label>
-    <select id="userSelect"></select>
-    <button id="userButton">Continuar</button>
-  </div>
+  <label for="userSelect">Selecciona tu usuario:</label>
+  <select id="userSelect">
+    <option value="" disabled selected>-- Selecciona opción --</option>
+  </select>
+  <button id="userButton">Continuar</button>
 
-  <!-- Contenedor de preguntas y respuestas -->
   <div id="questionContainer" style="display:none;">
     <h2 id="questionText"></h2>
     <div id="answersContainer"></div>
   </div>
-
-  <!-- Contenedor de resultados -->
   <div id="resultsContainer"></div>
 
   <script>
-    // Listado de usuarios
     const users = [
       "usuario1","usuario2","usuario3","usuario4","usuario5",
       "usuario6","usuario7","usuario8","usuario9","usuario10","usuario11"
     ];
 
-    // Preguntas: cada elemento contiene - texto de pregunta y array con opciones
-    // Ejemplo: { question: "¿Pregunta X?", options: ["A","B","C","D"] }
     const questionsData = [
       {
         question: "¿Cuál es tu color favorito?",
@@ -45,45 +38,42 @@
         question: "¿Cuál es tu deporte favorito?",
         options: ["Fútbol", "Baloncesto", "Tenis", "Natación"]
       }
-      // Agrega más preguntas si lo deseas
     ];
 
-    // Almacena cuántos votos tiene cada opción
     let clickCounts = {};
-
-    // Inicializar select de usuarios
     const userSelect = document.getElementById("userSelect");
+
+    // Poblar lista de usuarios
     users.forEach(u => {
-      const optionEl = document.createElement("option");
-      optionEl.value = u;
-      optionEl.textContent = u;
-      userSelect.appendChild(optionEl);
+      const optEl = document.createElement("option");
+      optEl.value = u;
+      optEl.textContent = u;
+      userSelect.appendChild(optEl);
     });
 
-    // Evento para botón de selección de usuario
+    // Evento al pulsar el botón de continuar
     document.getElementById("userButton").addEventListener("click", () => {
-      const selectedUser = userSelect.value; // Se puede usar si se requiere
-      // Ocultar selección de usuario y mostrar la pregunta
-      document.getElementById("userSelect").disabled = true;
+      if (!userSelect.value) {
+        alert("Selecciona un usuario primero.");
+        return;
+      }
+      userSelect.disabled = true;
       document.getElementById("userButton").disabled = true;
       document.getElementById("questionContainer").style.display = "block";
       showRandomQuestion();
     });
 
-    // Mostrar pregunta aleatoria
     function showRandomQuestion() {
       const randomIndex = Math.floor(Math.random() * questionsData.length);
-      const current = questionsData[randomIndex];
-      document.getElementById("questionText").textContent = current.question;
+      const currentQ = questionsData[randomIndex];
 
-      // Limpiar contenedores y contadores
-      clickCounts = {};
+      document.getElementById("questionText").textContent = currentQ.question;
       const answersContainer = document.getElementById("answersContainer");
       answersContainer.innerHTML = "";
       document.getElementById("resultsContainer").textContent = "";
 
-      // Crear botones
-      current.options.forEach(opt => {
+      clickCounts = {};
+      currentQ.options.forEach(opt => {
         clickCounts[opt] = 0;
         const btn = document.createElement("button");
         btn.textContent = opt;
@@ -95,7 +85,6 @@
       });
     }
 
-    // Mostrar resultados
     function showResults() {
       const resultsContainer = document.getElementById("resultsContainer");
       resultsContainer.innerHTML = "";
