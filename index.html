@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tag Click Counter</title>
+</head>
+<body>
+  <h1>Tag Click Counter Title</h1>
+  <div id="tags"></div>
+  <div id="results"></div>
+
+  <script>
+    const tagTexts = ["Tag A", "Tag B", "Tag C"];
+    const clickCounts = { "Tag A": 0, "Tag B": 0, "Tag C": 0 };
+
+    const tagsContainer = document.getElementById("tags");
+    const resultsContainer = document.getElementById("results");
+
+    // Generate clickable tags
+    tagTexts.forEach(tag => {
+      const btn = document.createElement("button");
+      btn.textContent = tag;
+      btn.addEventListener("click", () => {
+        clickCounts[tag]++;
+        resultsContainer.textContent = JSON.stringify(clickCounts);
+      });
+      tagsContainer.appendChild(btn);
+    });
+  </script>
+</body>
+</html>
